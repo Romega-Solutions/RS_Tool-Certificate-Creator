@@ -26,12 +26,13 @@ export async function GET() {
       exampleEnvelope: {
         event: "certificate.send_requested",
         sourceTool: "RS_Tool-Romega-Certificate-Creator",
+        version: "1.0",
+        requestId: "cert_20260521_example",
+        occurredAt: "2026-05-21T00:00:00.000Z",
+        actor: { type: "api", name: "API Integration" },
         data: {
-          recipientEmail: "person@example.com",
-          recipientName: "Recipient Name",
-          subject: "Your Certificate of Completion",
-          message: "Please find your certificate attached.",
-          certificateImage: "data:image/png;base64,...",
+          recipientName: "Jane Doe",
+          recipientEmail: "jane@romega-solutions.com",
         },
       },
     },
