@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { requireApiSession } from "@/lib/server-auth";
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const { ids } = await request.json();
 

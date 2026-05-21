@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/server-auth";
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const {

@@ -36,8 +36,8 @@ A modern, responsive certificate generator built with Next.js 14 and Tailwind CS
 
 This system now includes a complete email queue with:
 
-- **PostgreSQL Database**: Self-hosted at 66.181.46.58:5432
-- **n8n Webhook**: https://n8n.kenbuilds.tech/webhook/certificate-email-api
+- **PostgreSQL Database**: Configured with `DATABASE_URL`
+- **n8n Webhook**: Configured with `N8N_WEBHOOK_URL`
 - **4 Email Presets**: Professional templates for different use cases
 - **Batch Support**: Queue multiple certificates with personalized emails
 - **Status Tracking**: Real-time monitoring with auto-refresh
@@ -48,51 +48,33 @@ See **[docs/UPDATE-SUMMARY.md](./docs/UPDATE-SUMMARY.md)** for complete details.
 
 The application features secure authentication to ensure only authorized Romega Solutions team members can create and manage certificates.
 
-### Default Credentials
+### Credentials
 
-**Username:** `romega_admin`  
-**Password:** `RomegaCert2024!`
+Credentials are configured through server-side environment variables. Copy `.env.example` to `.env.local` and set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SESSION_SECRET` before running the app.
 
 ### Security Features
 
 - Session-based authentication
-- Protected routes with middleware
+- Server-side API route protection with an HTTP-only session cookie
 - Automatic redirect to login for unauthenticated users
 - Secure logout functionality
 - Client-side route protection
 - 7-day session duration
 
-### Changing Credentials
-
-For production deployment, update the credentials in `src/lib/auth.ts`:
-
-```typescript
-export const ADMIN_CREDENTIALS = {
-  username: "your_new_username",
-  password: "your_strong_password",
-};
-```
-
-**Better Practice - Use Environment Variables:**
+### Environment Variables
 
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_ADMIN_USERNAME=your_username
-NEXT_PUBLIC_ADMIN_PASSWORD=your_strong_password
-SESSION_SECRET=your_random_secret_key
+DATABASE_URL=postgresql://cert_admin:replace-with-password@db.example.com:5432/certificate_queue
+N8N_WEBHOOK_URL=https://n8n.example.com/webhook/certificate-email-api
+ADMIN_USERNAME=your_username
+ADMIN_PASSWORD=your_strong_password
+ADMIN_NAME=Certificate Admin
+ADMIN_EMAIL=admin@example.com
+SESSION_SECRET=your_long_random_secret
+N8N_UPDATE_TOKEN=your_n8n_callback_token
 ```
-
-Then update `src/lib/auth.ts` to use these variables:
-
-```typescript
-export const ADMIN_CREDENTIALS = {
-  username: process.env.NEXT_PUBLIC_ADMIN_USERNAME || "romega_admin",
-  password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "RomegaCert2024!",
-};
-```
-
-postgres=# CREATE USER cert_admin WITH PASSWORD 'certificate123'
 
 ## 🏗️ Project Structure
 

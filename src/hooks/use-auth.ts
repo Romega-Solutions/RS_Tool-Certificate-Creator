@@ -1,10 +1,11 @@
 // src/hooks/use-auth.ts
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  login as authLogin,
   logout as authLogout,
   getCurrentUser,
   isAuthenticated as checkAuth,
@@ -27,10 +28,19 @@ export const useAuth = () => {
     setIsLoading(false);
   }, []);
 
-  const login = (username: string, password: string): boolean => {
-    const userData = authLogin(username, password);
+  const login = async (username: string, password: string): Promise<boolean> => {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
 
-    if (userData) {
+    if (response.ok) {
+      const { user: userData } = await response.json();
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("isAuthenticated", "true");
       setUser(userData);
       setIsAuthenticated(true);
       return true;
@@ -40,6 +50,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
+    void fetch("/api/auth/logout", { method: "POST" });
     authLogout();
     setUser(null);
     setIsAuthenticated(false);
