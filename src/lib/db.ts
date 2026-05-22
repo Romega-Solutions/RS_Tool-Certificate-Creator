@@ -90,7 +90,7 @@ export async function getEmailQueue(filters?: {
       WHERE 1=1
     `;
 
-    const params: any[] = [];
+    const params: string[] = [];
     let paramIndex = 1;
 
     if (filters?.status) {

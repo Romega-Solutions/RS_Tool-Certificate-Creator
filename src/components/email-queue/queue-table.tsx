@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Table,
@@ -21,6 +22,8 @@ import {
 import { EmailQueueItem } from "@/types/email-queue";
 import { MoreVertical, Eye, Trash2, Send } from "lucide-react";
 import { format } from "date-fns";
+
+type BadgeVariant = ComponentProps<typeof Badge>["variant"];
 
 interface QueueTableProps {
   items: EmailQueueItem[];
@@ -71,10 +74,7 @@ export default function QueueTable({
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<
-      string,
-      { variant: any; className: string; icon?: string }
-    > = {
+    const variants: Record<string, { variant: BadgeVariant; className: string }> = {
       pending: {
         variant: "secondary",
         className:

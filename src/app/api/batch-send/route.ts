@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { requireApiSession } from "@/lib/server-auth";
 
+type CertificateWebhookPayload = {
+  id?: number;
+  recipient_email: string;
+  recipient_name: string;
+  certificate_image: string;
+  subject: string;
+  message: string;
+  timestamp: string;
+  email_header_title?: string;
+  email_header_subtitle?: string;
+  email_footer_company?: string;
+  email_footer_dept?: string;
+  email_sender_name?: string;
+  primary_color?: string;
+  secondary_color?: string;
+  accent_color?: string;
+  highlight_color?: string;
+};
+
 export async function POST(request: NextRequest) {
   const unauthorized = await requireApiSession();
   if (unauthorized) return unauthorized;
@@ -47,7 +66,7 @@ export async function POST(request: NextRequest) {
 
         // Send to n8n webhook with the database ID
         // Prepare payload matching n8n code format
-        const payload: any = {
+        const payload: CertificateWebhookPayload = {
           id: item.id, // Include database ID for n8n to call back
           recipient_email: item.recipient_email,
           recipient_name: item.recipient_name,

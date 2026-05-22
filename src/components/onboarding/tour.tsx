@@ -73,17 +73,20 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
   const isLastStep = currentStep === TOUR_STEPS.length - 1;
 
   useEffect(() => {
-    if (currentStepData.target) {
-      const element = document.querySelector(currentStepData.target);
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        setHighlightRect(rect);
-        // Scroll element into view
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+    const timeoutId = window.setTimeout(() => {
+      if (currentStepData.target) {
+        const element = document.querySelector(currentStepData.target);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          setHighlightRect(rect);
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      } else {
+        setHighlightRect(null);
       }
-    } else {
-      setHighlightRect(null);
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [currentStep, currentStepData.target]);
 
   const handleNext = () => {
