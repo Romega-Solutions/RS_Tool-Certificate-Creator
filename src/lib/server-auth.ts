@@ -125,3 +125,41 @@ export async function requireApiSessionOrWebhookToken(request: NextRequest) {
 
   return requireApiSession();
 }
+
+function getAutomationApiKeys() {
+  return [process.env.RS_TOOL_API_KEY, process.env.API_KEY]
+    .map((key) => key?.trim())
+    .filter((key): key is string => Boolean(key));
+}
+
+function hasValidAutomationApiKey(request: NextRequest) {
+  const requestKey = request.headers.get("x-api-key")?.trim();
+  if (!requestKey) return false;
+
+  return getAutomationApiKeys().some((key) => safeEqual(requestKey, key));
+}
+
+export async function requireAutomationCallbackAuth(request: NextRequest) {
+  if (hasValidAutomationApiKey(request)) {
+    return null;
+  }
+
+  const webhookToken = process.env.N8N_UPDATE_TOKEN;
+  const authHeader = request.headers.get("authorization");
+
+  if (
+    webhookToken &&
+    authHeader?.startsWith("Bearer ") &&
+    safeEqual(authHeader.slice("Bearer ".length), webhookToken)
+  ) {
+    return null;
+  }
+
+  return NextResponse.json(
+    {
+      error: "Unauthorized",
+      message: "Send X-API-Key with RS_TOOL_API_KEY/API_KEY or Authorization Bearer N8N_UPDATE_TOKEN.",
+    },
+    { status: 401 }
+  );
+}

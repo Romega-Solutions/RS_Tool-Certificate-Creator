@@ -17,8 +17,20 @@ export async function GET() {
         consumes: "org-chart",
         localEndpoint: "/api/org-chart/people",
       },
-      inboundEvents: ["certificate.send_requested"],
+      inboundEvents: [
+        "org_chart.people.snapshot_ready",
+        "certificate.send_requested",
+        "certificate.delivery.status_updated",
+      ],
       outboundEvents: ["certificate.send_requested"],
+      callbackEndpoints: [
+        {
+          event: "certificate.delivery.status_updated",
+          method: "POST",
+          path: "/api/automation/callback",
+          auth: "X-API-Key or Authorization Bearer N8N_UPDATE_TOKEN",
+        },
+      ],
       webhookReady: true,
       n8n: {
         envVars: ["N8N_WEBHOOK_URL", "N8N_API_KEY"],
