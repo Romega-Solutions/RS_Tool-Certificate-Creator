@@ -11,6 +11,23 @@ interface EmailDialogProps {
   recipientName: string;
 }
 
+type SendCertificatePayload = {
+  email: string;
+  subject: string;
+  message: string;
+  certificateImage: string;
+  recipientName: string;
+  email_header_title?: string;
+  email_header_subtitle?: string;
+  email_footer_company?: string;
+  email_footer_dept?: string;
+  email_sender_name?: string;
+  primary_color?: string;
+  secondary_color?: string;
+  accent_color?: string;
+  highlight_color?: string;
+};
+
 export default function EmailDialog({
   isOpen,
   onClose,
@@ -61,7 +78,7 @@ export default function EmailDialog({
 
     try {
       // Prepare payload
-      const payload: any = {
+      const payload: SendCertificatePayload = {
         email: email.trim(),
         subject: subject.trim(),
         message: message.trim(),
@@ -134,7 +151,8 @@ export default function EmailDialog({
                 Send Certificate via Email
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Enter the recipient's email address and customize your message
+                Enter the recipient&apos;s email address and customize your
+                message
               </p>
             </div>
             <button

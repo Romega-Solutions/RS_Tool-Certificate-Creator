@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+/* eslint-disable @next/next/no-img-element */
+
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import QueueStats from "@/components/email-queue/queue-stats";
@@ -32,7 +34,7 @@ export default function EmailQueuePage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   // Fetch queue items
-  const fetchQueue = async () => {
+  const fetchQueue = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (filters.status) params.append("status", filters.status);
@@ -54,7 +56,7 @@ export default function EmailQueuePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchQueue();
@@ -65,7 +67,7 @@ export default function EmailQueuePage() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [filters]);
+  }, [fetchQueue]);
 
   // Send selected emails
   const handleSendSelected = async () => {

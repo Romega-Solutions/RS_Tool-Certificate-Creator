@@ -6,9 +6,13 @@ import {
   updateEmailQueueStatus,
   deleteEmailQueue,
 } from "@/lib/db";
+import { requireApiSession } from "@/lib/server-auth";
 
 // GET - Fetch all email queue items with filters
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || undefined;
@@ -42,6 +46,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Add new item to queue
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const {
@@ -85,6 +92,9 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Remove item from queue
 export async function DELETE(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -113,6 +123,9 @@ export async function DELETE(request: NextRequest) {
 
 // PATCH - Update item status
 export async function PATCH(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { id, status, errorMessage, sentAt } = body;

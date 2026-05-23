@@ -5,8 +5,8 @@
 ### 1. **Environment Variables** (`.env.local`)
 
 ```env
-DATABASE_URL=postgresql://cert_admin:certificate123@66.181.46.58:5432/certificate_queue
-N8N_WEBHOOK_URL=https://n8n.kenbuilds.tech/webhook/certificate-email-api
+DATABASE_URL=postgresql://cert_admin:replace-with-password@db.example.com:5432/certificate_queue
+N8N_WEBHOOK_URL=https://n8n.example.com/webhook/certificate-email-api
 ```
 
 ✅ Added `N8N_WEBHOOK_URL` - All API routes now use this webhook

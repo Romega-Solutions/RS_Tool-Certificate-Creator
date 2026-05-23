@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/server-auth";
+
+type CertificateWebhookPayload = {
+  recipient_email: string;
+  recipient_name: string;
+  certificate_image: string;
+  subject: string;
+  message: string;
+  timestamp: string;
+  email_header_title?: string;
+  email_header_subtitle?: string;
+  email_footer_company?: string;
+  email_footer_dept?: string;
+  email_sender_name?: string;
+  primary_color?: string;
+  secondary_color?: string;
+};
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const {
@@ -39,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare payload for n8n webhook (matching n8n code format)
-    const payload: any = {
+    const payload: CertificateWebhookPayload = {
       recipient_email: email,
       recipient_name: recipientName || "Recipient",
       certificate_image: certificateImage,
@@ -83,7 +103,7 @@ export async function POST(request: NextRequest) {
     if (responseText) {
       try {
         result = JSON.parse(responseText);
-      } catch (e) {
+      } catch {
         // Response is not JSON, that's okay
         result = { message: responseText };
       }

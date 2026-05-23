@@ -1,6 +1,13 @@
 // Diagnostic script for PostgreSQL connection issues
+/* eslint-disable @typescript-eslint/no-require-imports */
 const net = require("net");
 const { Pool } = require("pg");
+
+const DB_HOST = process.env.DB_HOST || "localhost";
+const DB_PORT = Number(process.env.DB_PORT || 5432);
+const DB_NAME = process.env.DB_NAME || "certificate_queue";
+const DB_USER = process.env.DB_USER || "cert_admin";
+const DB_PASSWORD = process.env.DB_PASSWORD;
 
 // Test 1: Check if port is reachable
 async function testPortConnection() {
@@ -15,7 +22,7 @@ async function testPortConnection() {
     socket.setTimeout(timeout);
 
     socket.on("connect", () => {
-      console.log("✅ Port 5432 is REACHABLE on 66.181.46.58");
+      console.log(`✅ Port ${DB_PORT} is REACHABLE on ${DB_HOST}`);
       socket.destroy();
       resolve(true);
     });
@@ -37,8 +44,8 @@ async function testPortConnection() {
       resolve(false);
     });
 
-    console.log("Attempting to connect to 66.181.46.58:5432...");
-    socket.connect(5432, "66.181.46.58");
+    console.log(`Attempting to connect to ${DB_HOST}:${DB_PORT}...`);
+    socket.connect(DB_PORT, DB_HOST);
   });
 }
 
@@ -48,27 +55,20 @@ async function testPostgreSQLAuth() {
   console.log("TEST 2: PostgreSQL Authentication");
   console.log("=================================\n");
 
+  if (!DB_PASSWORD) {
+    console.log("❌ DB_PASSWORD is not set; skipping authentication test");
+    return false;
+  }
+
   const configs = [
     {
-      name: "Remote VPS",
+      name: "Configured database",
       config: {
-        host: "66.181.46.58",
-        port: 5432,
-        database: "certificate_queue",
-        user: "cert_admin",
-        password: "YourSecurePassword123!",
-        ssl: false,
-        connectionTimeoutMillis: 5000,
-      },
-    },
-    {
-      name: "Localhost",
-      config: {
-        host: "localhost",
-        port: 5432,
-        database: "certificate_queue",
-        user: "cert_admin",
-        password: "YourSecurePassword123!",
+        host: DB_HOST,
+        port: DB_PORT,
+        database: DB_NAME,
+        user: DB_USER,
+        password: DB_PASSWORD,
         ssl: false,
         connectionTimeoutMillis: 5000,
       },

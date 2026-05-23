@@ -202,7 +202,7 @@ Warm regards,
 | Component       | Status         | Notes                                                    |
 | --------------- | -------------- | -------------------------------------------------------- |
 | n8n Webhook     | ✅ Configured  | https://n8n.kenbuilds.tech/webhook/certificate-email-api |
-| PostgreSQL      | ✅ Connected   | 66.181.46.58:5432                                        |
+| PostgreSQL      | ✅ Connected   | Configured through `DATABASE_URL`                        |
 | Email Presets   | ✅ 4 Available | Event, KPI, Internship, UMak                             |
 | Auto-refresh    | ✅ Working     | 5-second intervals                                       |
 | Batch Generator | ✅ Enhanced    | Checkbox selection + presets                             |
