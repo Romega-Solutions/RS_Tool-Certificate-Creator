@@ -259,7 +259,7 @@ export default function BatchGenerator({
             Select which recipients to queue (all are selected by default)
           </li>
           <li>
-            Click "Queue Selected Certificates" to add them to the email queue
+            Click &quot;Queue Selected Certificates&quot; to add them to the email queue
           </li>
           <li>Go to Email Queue page to review and send them</li>
         </ol>
