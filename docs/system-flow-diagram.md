@@ -113,7 +113,7 @@ OPTION B: QUEUE FOR LATER (Batch)
            v
 ┌─────────────────────────────────────┐
 │  PostgreSQL Database                │
-│  66.181.46.58:5432                  │
+│  configured DATABASE_URL            │
 │  certificate_queue                  │
 │                                     │
 │  TABLE: email_queue                 │
@@ -404,8 +404,8 @@ Auto-refresh: Every 5 seconds, UI polls database for status changes
 
 .env.local:
 ┌───────────────────────────────────────────────────────────────────────┐
-│ DATABASE_URL=postgresql://cert_admin:certificate123@                 │
-│              66.181.46.58:5432/certificate_queue                      │
+│ DATABASE_URL=postgresql://cert_admin:replace-with-password@          │
+│              db.example.com:5432/certificate_queue                    │
 │                                                                       │
 │ N8N_WEBHOOK_URL=https://n8n.kenbuilds.tech/webhook/                  │
 │                 certificate-email-api                                 │

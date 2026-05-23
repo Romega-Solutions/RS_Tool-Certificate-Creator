@@ -3,7 +3,7 @@
 ## Pre-Testing Setup
 
 - [ ] Development server is running (`pnpm run dev`)
-- [ ] PostgreSQL database is accessible (66.181.46.58:5432)
+- [ ] PostgreSQL database from `DATABASE_URL` is accessible
 - [ ] n8n workflow is configured at https://n8n.kenbuilds.tech/webhook/certificate-email-api
 - [ ] `.env.local` has both DATABASE_URL and N8N_WEBHOOK_URL
 

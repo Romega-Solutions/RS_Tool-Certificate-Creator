@@ -46,7 +46,7 @@ function TemplatesContent() {
         } else {
           break; // Stop if template doesn't exist
         }
-      } catch (error) {
+      } catch {
         break; // Stop on error
       }
 

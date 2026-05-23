@@ -14,13 +14,13 @@ export default function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     // Attempt login
-    const success = login(username, password);
+    const success = await login(username, password);
 
     if (success) {
       router.push("/dashboard");
@@ -86,14 +86,9 @@ export default function LoginForm() {
           </Button>
         </form>
 
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <p className="text-xs font-semibold mb-2">Demo Credentials:</p>
-          <div className="text-xs space-y-1 text-gray-700 dark:text-gray-300">
-            <p>• admin / admin123</p>
-            <p>• demo / demo123</p>
-            <p>• user / user123</p>
-          </div>
-        </div>
+        <p className="mt-6 text-xs text-gray-500 dark:text-gray-400 text-center">
+          Use the admin credentials configured in the deployment environment.
+        </p>
       </div>
     </div>
   );

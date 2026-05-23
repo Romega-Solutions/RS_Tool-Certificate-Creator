@@ -1,11 +1,28 @@
 // src/lib/batch-generator.ts (Fixed to use element.maxWidth)
-import JSZip from "jszip";
 import { BatchRecipient, BatchProgress } from "@/types/batch";
 import {
   TextElement,
   ImageElement,
   CertificateTemplate,
 } from "@/types/certificates";
+
+type RawBatchRecipient = {
+  name?: unknown;
+  email?: unknown;
+  title?: unknown;
+  date?: unknown;
+  customFields?: unknown;
+};
+
+function normalizeCustomFields(customFields: unknown): Record<string, string> {
+  if (!customFields || typeof customFields !== "object" || Array.isArray(customFields)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(customFields).map(([key, value]) => [key, String(value)])
+  );
+}
 
 /**
  * Parse recipients file (JSON)
@@ -19,7 +36,7 @@ export async function parseRecipientsFile(
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
-        const data = JSON.parse(content);
+        const data = JSON.parse(content) as { recipients?: RawBatchRecipient[] };
 
         if (!data.recipients || !Array.isArray(data.recipients)) {
           throw new Error(
@@ -27,8 +44,7 @@ export async function parseRecipientsFile(
           );
         }
 
-        const recipients = data.recipients.map(
-          (recipient: any, index: number) => {
+        const recipients = data.recipients.map((recipient, index) => {
             if (!recipient.name || typeof recipient.name !== "string") {
               throw new Error(
                 `Recipient at index ${index} is missing a valid "name" field`
@@ -48,12 +64,11 @@ export async function parseRecipientsFile(
             return {
               name: recipient.name,
               email: recipient.email,
-              title: recipient.title || "",
-              date: recipient.date || "",
-              customFields: recipient.customFields || {},
+              title: typeof recipient.title === "string" ? recipient.title : "",
+              date: typeof recipient.date === "string" ? recipient.date : "",
+              customFields: normalizeCustomFields(recipient.customFields),
             };
-          }
-        );
+          });
 
         resolve(recipients);
       } catch (error) {
@@ -134,7 +149,7 @@ function drawSmartText(
 
     // FIXED: Use element.maxWidth if specified, otherwise fallback to 80% of template width
     const maxWidth = element.maxWidth || templateWidth * 0.8;
-    let x = element.position.x;
+    const x = element.position.x;
 
     if (element.textAlign === "center") {
       // For center alignment, position.x is the center point
@@ -198,36 +213,6 @@ async function renderCertificate(
     const text = replacePlaceholders(element.text, recipient);
     drawSmartText(ctx, text, element, template.width);
   });
-}
-
-/**
- * Generate canvas as blob
- */
-async function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error("Failed to convert canvas to blob"));
-        }
-      },
-      "image/png",
-      1.0
-    );
-  });
-}
-
-/**
- * Sanitize filename (remove special characters)
- */
-function sanitizeFilename(name: string): string {
-  return name
-    .replace(/[^a-z0-9]/gi, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "")
-    .toLowerCase();
 }
 
 /**

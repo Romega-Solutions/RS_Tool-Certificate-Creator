@@ -86,11 +86,11 @@ LIMIT 10;
 ```
 
 4. **Connection Details**:
-   - Host: `66.181.46.58`
+   - Host: your PostgreSQL host from `DATABASE_URL`
    - Port: `5432`
    - Database: `certificate_queue`
    - User: `cert_admin`
-   - Password: `YourSecurePassword123!`
+   - Password: your database password from `.env.local`
 
 ---
 
