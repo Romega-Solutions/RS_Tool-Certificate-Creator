@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Check, X, Plus } from "lucide-react";
 
 interface AddToQueueDialogProps {
@@ -13,6 +20,26 @@ interface AddToQueueDialogProps {
   recipientName: string;
   onSuccess?: () => void;
 }
+
+type StaffProfile = {
+  id?: string | number;
+  name?: string;
+  fullName?: string;
+  preferredName?: string;
+  email?: string;
+  department?: string;
+  title?: string;
+  role?: string;
+  [key: string]: unknown;
+};
+
+type StaffDirectoryResponse = {
+  ok: boolean;
+  enabled: boolean;
+  reason?: "missing-config" | "unavailable";
+  status?: number;
+  people: StaffProfile[];
+};
 
 export default function AddToQueueDialog({
   isOpen,
@@ -33,10 +60,71 @@ export default function AddToQueueDialog({
     "idle"
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const [staff, setStaff] = useState<StaffProfile[]>([]);
+  const [staffStatus, setStaffStatus] = useState<
+    "idle" | "loading" | "ready" | "missing-config" | "unavailable"
+  >("idle");
+  const [selectedStaffKey, setSelectedStaffKey] = useState("");
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
+
+  const getStaffDisplayName = (person: StaffProfile) => {
+    return (
+      person.preferredName ||
+      person.fullName ||
+      person.name ||
+      person.email ||
+      "Unnamed staff"
+    );
+  };
+
+  const getStaffKey = (person: StaffProfile, index: number) => {
+    return String(
+      person.id ?? person.email ?? `${getStaffDisplayName(person)}-${index}`
+    );
+  };
+
+  const loadStaffDirectory = useCallback(async () => {
+    setStaffStatus("loading");
+    setStaff([]);
+    setSelectedStaffKey("");
+
+    try {
+      const response = await fetch("/api/org-chart/people", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setStaffStatus("unavailable");
+        return;
+      }
+
+      const data = (await response.json()) as StaffDirectoryResponse;
+
+      if (!data.enabled && data.reason === "missing-config") {
+        setStaffStatus("missing-config");
+        return;
+      }
+
+      if (!data.ok) {
+        setStaffStatus("unavailable");
+        return;
+      }
+
+      setStaff(Array.isArray(data.people) ? data.people : []);
+      setStaffStatus("ready");
+    } catch {
+      setStaffStatus("unavailable");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      void loadStaffDirectory();
+    }
+  }, [isOpen, loadStaffDirectory]);
 
   const templates: Record<
     "event" | "kpi" | "internship" | "umak",
@@ -154,6 +242,102 @@ export default function AddToQueueDialog({
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto flex-1">
+          <div className="rounded-lg border border-gray-200 dark:border-zinc-700 p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <label className="block text-sm font-semibold">
+                  Staff Directory
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Select a staff profile to fill the recipient email, or type manually below.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={loadStaffDirectory}
+                disabled={isAdding || staffStatus === "loading"}
+                className="px-3 py-1 text-sm"
+              >
+                {staffStatus === "loading" ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Loading
+                  </>
+                ) : (
+                  "Reload"
+                )}
+              </Button>
+            </div>
+
+            <Select
+              value={selectedStaffKey}
+              onValueChange={(value) => {
+                setSelectedStaffKey(value);
+                const selectedIndex = staff.findIndex(
+                  (person, index) => getStaffKey(person, index) === value
+                );
+                const selected =
+                  selectedIndex >= 0 ? staff[selectedIndex] : undefined;
+
+                if (selected?.email) {
+                  setEmail(selected.email);
+                  setErrorMessage("");
+                }
+              }}
+              disabled={
+                isAdding || staffStatus !== "ready" || staff.length === 0
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue
+                  placeholder={
+                    staffStatus === "loading"
+                      ? "Loading staff directory..."
+                      : "Choose a staff profile"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {staff.map((person, index) => {
+                  const staffKey = getStaffKey(person, index);
+                  const displayName = getStaffDisplayName(person);
+
+                  return (
+                    <SelectItem
+                      key={staffKey}
+                      value={staffKey}
+                      disabled={!person.email}
+                    >
+                      <span className="flex flex-col items-start">
+                        <span>{displayName}</span>
+                        <span className="text-xs text-gray-500">
+                          {person.email || "No email on profile"}
+                        </span>
+                      </span>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+
+            {staffStatus === "missing-config" && (
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-2">
+                Staff lookup is disabled because the Org Chart connection is not configured.
+              </p>
+            )}
+            {staffStatus === "unavailable" && (
+              <p className="text-xs text-red-700 dark:text-red-400 mt-2">
+                Staff lookup is temporarily unavailable. Enter the recipient email manually.
+              </p>
+            )}
+            {staffStatus === "ready" && staff.length === 0 && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                No active staff profiles were returned. Enter the recipient email manually.
+              </p>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-semibold mb-2">
               Recipient Email <span className="text-red-500">*</span>
@@ -164,6 +348,7 @@ export default function AddToQueueDialog({
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setEmail(e.target.value);
+                setSelectedStaffKey("");
                 setErrorMessage("");
               }}
               disabled={isAdding}

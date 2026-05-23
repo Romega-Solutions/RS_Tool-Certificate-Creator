@@ -25,9 +25,18 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    // Simple authentication check (replace with actual API call)
-    if (username === "romega_admin" && password === "RomegaCert2024!") {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      const { user } = await response.json();
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("user", JSON.stringify(user));
       if (remember) {
         localStorage.setItem("rememberMe", "true");
       }

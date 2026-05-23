@@ -1,21 +1,33 @@
 // Simple test script to verify PostgreSQL connection
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { Pool } = require("pg");
 
+const DB_HOST = process.env.DB_HOST || "localhost";
+const DB_PORT = Number(process.env.DB_PORT || 5432);
+const DB_NAME = process.env.DB_NAME || "certificate_queue";
+const DB_USER = process.env.DB_USER || "cert_admin";
+const DB_PASSWORD = process.env.DB_PASSWORD;
+
+if (!DB_PASSWORD) {
+  console.error("DB_PASSWORD is required. Copy .env.example to .env.local and set database values.");
+  process.exit(1);
+}
+
 const pool = new Pool({
-  host: "66.181.46.58",
-  port: 5432,
-  database: "certificate_queue",
-  user: "cert_admin",
-  password: "YourSecurePassword123!",
+  host: DB_HOST,
+  port: DB_PORT,
+  database: DB_NAME,
+  user: DB_USER,
+  password: DB_PASSWORD,
   ssl: false,
   connectionTimeoutMillis: 5000,
 });
 
 async function testConnection() {
   console.log("Testing PostgreSQL connection...");
-  console.log("Host: 66.181.46.58:5432");
-  console.log("Database: certificate_queue");
-  console.log("User: cert_admin\n");
+  console.log(`Host: ${DB_HOST}:${DB_PORT}`);
+  console.log(`Database: ${DB_NAME}`);
+  console.log(`User: ${DB_USER}\n`);
 
   try {
     const client = await pool.connect();
@@ -69,7 +81,7 @@ async function testConnection() {
     console.error("Message:", error.message);
     console.error("Code:", error.code);
     console.error("\nPlease check:");
-    console.error("1. VPS IP address is correct: 66.181.46.58");
+    console.error("1. Database host and port are correct");
     console.error("2. PostgreSQL is running on the VPS");
     console.error("3. Firewall allows port 5432");
     console.error("4. pg_hba.conf allows remote connections");

@@ -257,7 +257,7 @@ function DashboardContent() {
           <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Click "Create New Certificate" to start designing</span>
+              <span>Click &quot;Create New Certificate&quot; to start designing</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
