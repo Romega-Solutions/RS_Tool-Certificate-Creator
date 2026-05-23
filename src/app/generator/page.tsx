@@ -25,7 +25,6 @@ import {
   HelpCircle,
   X,
   Mail,
-  Users,
 } from "lucide-react";
 
 const CERTIFICATE_WIDTH = 1200;
@@ -39,17 +38,6 @@ const pageVariants = {
 const headerVariants = {
   hidden: { y: -20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { duration: 0.4 } },
-};
-
-const tooltipVariants = {
-  hidden: { opacity: 0, scale: 0.8, y: -10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 20 },
-  },
-  exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
 };
 
 function GeneratorContent() {
@@ -73,8 +61,6 @@ function GeneratorContent() {
   >([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [showEmailTutorial, setShowEmailTutorial] = useState(false);
-  const [showBatchTutorial, setShowBatchTutorial] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
 
   useEffect(() => {
     // Load available templates
@@ -99,7 +85,7 @@ function GeneratorContent() {
             } else {
               break;
             }
-          } catch (error) {
+          } catch {
             break;
           }
         }
@@ -142,7 +128,7 @@ function GeneratorContent() {
       const timer = setTimeout(() => setShowEmailTutorial(true), 2000);
       return () => clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [searchParams, showTour]);
 
   const handleTourComplete = () => {
     setShowTour(false);
@@ -160,12 +146,6 @@ function GeneratorContent() {
 
   const handleShowEmailTutorial = () => {
     setShowEmailTutorial(true);
-    setTutorialStep(0);
-  };
-
-  const handleShowBatchTutorial = () => {
-    setShowBatchTutorial(true);
-    setTutorialStep(0);
   };
 
   const addTextElement = () => {
@@ -361,8 +341,8 @@ function GeneratorContent() {
                         Single Email (Quick Send)
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Look for the <strong>"Send via Email"</strong> button in
-                        the canvas area.
+                        Look for the <strong>&quot;Send via Email&quot;</strong>{" "}
+                        button in the canvas area.
                       </p>
                       <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 ml-4">
                         <li>
@@ -370,8 +350,11 @@ function GeneratorContent() {
                           UMak)
                         </li>
                         <li>• Customize subject and message</li>
-                        <li>• Enter recipient's email</li>
-                        <li>• Click "Send Certificate" to send immediately</li>
+                        <li>• Enter recipient&apos;s email</li>
+                        <li>
+                          • Click &quot;Send Certificate&quot; to send
+                          immediately
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -393,8 +376,8 @@ function GeneratorContent() {
                         Batch Generation (Multiple Emails)
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Click the <strong>"Batch Generation"</strong> tab on the
-                        right panel.
+                        Click the <strong>&quot;Batch Generation&quot;</strong>{" "}
+                        tab on the right panel.
                       </p>
                       <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 ml-4">
                         <li>

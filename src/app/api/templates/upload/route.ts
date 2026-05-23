@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, readdir } from "fs/promises";
 import path from "path";
 import fs from "fs";
+import { requireApiSession } from "@/lib/server-auth";
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const formData = await request.formData();
     const file = formData.get("template") as File;
