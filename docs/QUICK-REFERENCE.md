@@ -2,7 +2,7 @@
 
 ## ⚡ TL;DR - What Changed
 
-1. ✅ **n8n webhook** configured: `https://n8n.kenbuilds.tech/webhook/certificate-email-api`
+1. ✅ **n8n webhook** configured through `N8N_WEBHOOK_URL`
 2. ✅ **4 email presets** now available everywhere (including new **UMak** preset)
 3. ✅ All API routes use **PostgreSQL** + **n8n webhook**
 4. ✅ Email Queue has **auto-refresh** every 5 seconds
@@ -55,8 +55,8 @@
 
 ```env
 # .env.local
-DATABASE_URL=postgresql://cert_admin:certificate123@66.181.46.58:5432/certificate_queue
-N8N_WEBHOOK_URL=https://n8n.kenbuilds.tech/webhook/certificate-email-api
+DATABASE_URL=postgresql://cert_admin:replace-with-password@db.example.com:5432/certificate_queue
+N8N_WEBHOOK_URL=https://n8n.example.com/webhook/certificate-email-api
 ```
 
 ---

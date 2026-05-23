@@ -98,49 +98,50 @@ export default function GeneratorTour({ onComplete }: GeneratorTourProps) {
   const isLastStep = currentStep === GENERATOR_TOUR_STEPS.length - 1;
 
   useEffect(() => {
-    const element = document.querySelector(currentStepData.target);
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      setHighlightRect(rect);
+    const timeoutId = window.setTimeout(() => {
+      const element = document.querySelector(currentStepData.target);
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setHighlightRect(rect);
 
-      // Calculate tooltip position based on step position preference
-      let top = 0;
-      let left = 0;
+        let top = 0;
+        let left = 0;
 
-      switch (currentStepData.position) {
-        case "top-left":
-          top = rect.top - 20;
-          left = rect.left;
-          break;
-        case "top-right":
-          top = rect.top - 20;
-          left = rect.right - 400;
-          break;
-        case "bottom-left":
-          top = rect.bottom + 20;
-          left = rect.left;
-          break;
-        case "bottom-right":
-          top = rect.bottom + 20;
-          left = rect.right - 400;
-          break;
-        case "center":
-          top = window.innerHeight / 2 - 150;
-          left = window.innerWidth / 2 - 200;
-          break;
+        switch (currentStepData.position) {
+          case "top-left":
+            top = rect.top - 20;
+            left = rect.left;
+            break;
+          case "top-right":
+            top = rect.top - 20;
+            left = rect.right - 400;
+            break;
+          case "bottom-left":
+            top = rect.bottom + 20;
+            left = rect.left;
+            break;
+          case "bottom-right":
+            top = rect.bottom + 20;
+            left = rect.right - 400;
+            break;
+          case "center":
+            top = window.innerHeight / 2 - 150;
+            left = window.innerWidth / 2 - 200;
+            break;
+        }
+
+        top = Math.max(20, Math.min(top, window.innerHeight - 350));
+        left = Math.max(20, Math.min(left, window.innerWidth - 420));
+
+        setTooltipPosition({ top, left });
+
+        if (currentStepData.position !== "center") {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
+    }, 0);
 
-      // Keep tooltip within viewport
-      top = Math.max(20, Math.min(top, window.innerHeight - 350));
-      left = Math.max(20, Math.min(left, window.innerWidth - 420));
-
-      setTooltipPosition({ top, left });
-
-      // Scroll element into view if needed
-      if (currentStepData.position !== "center") {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
+    return () => window.clearTimeout(timeoutId);
   }, [currentStep, currentStepData.target, currentStepData.position]);
 
   const handleNext = () => {

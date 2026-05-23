@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateEmailQueueStatus } from "@/lib/db";
+import { requireApiSessionOrWebhookToken } from "@/lib/server-auth";
 
 /**
  * API endpoint for n8n to update email status after sending
@@ -14,6 +15,9 @@ import { updateEmailQueueStatus } from "@/lib/db";
  * }
  */
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireApiSessionOrWebhookToken(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { id, status, errorMessage, sentAt } = body;
@@ -69,6 +73,9 @@ export async function POST(request: NextRequest) {
  * Allows updating multiple emails at once
  */
 export async function PATCH(request: NextRequest) {
+  const unauthorized = await requireApiSessionOrWebhookToken(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { updates } = body;

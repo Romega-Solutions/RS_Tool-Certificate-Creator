@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import SendCertificateButton from "./send-certificate-button";
@@ -22,18 +24,14 @@ interface CertificateCanvasProps {
 }
 
 function DraggableElement({
-  id,
   position,
   onDrag,
   onSelect,
-  isSelected,
   children,
 }: {
-  id: string;
   position: { x: number; y: number };
   onDrag: (x: number, y: number) => void;
   onSelect: () => void;
-  isSelected: boolean;
   children: React.ReactNode;
 }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -173,7 +171,7 @@ export default function CertificateCanvas({
         const textWidth = metrics.width;
 
         const maxWidth = element.maxWidth || template.width * 0.8;
-        let x = element.position.x;
+        const x = element.position.x;
 
         if (element.textAlign === "center") {
           ctx.textAlign = "center";
@@ -453,13 +451,11 @@ export default function CertificateCanvas({
 
                 {/* ACTUAL TEXT ELEMENT */}
                 <DraggableElement
-                  id={element.id}
                   position={element.position}
                   onDrag={(x, y) =>
                     onUpdateTextElement(element.id, { position: { x, y } })
                   }
                   onSelect={() => onSelectElement(element.id, "text")}
-                  isSelected={isSelected}
                 >
                   <div
                     style={{
@@ -528,13 +524,11 @@ export default function CertificateCanvas({
                 )}
 
                 <DraggableElement
-                  id={element.id}
                   position={element.position}
                   onDrag={(x, y) =>
                     onUpdateImageElement(element.id, { position: { x, y } })
                   }
                   onSelect={() => onSelectElement(element.id, "image")}
-                  isSelected={isSelected}
                 >
                   <img
                     src={element.src}
