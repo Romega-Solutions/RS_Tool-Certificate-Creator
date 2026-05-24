@@ -31,6 +31,10 @@ export async function GET() {
           auth: "X-API-Key or Authorization Bearer N8N_UPDATE_TOKEN",
         },
       ],
+      auditHistory: {
+        storage: "n8n_data_table_when_configured",
+        envVars: ["N8N_URL", "N8N_API_KEY", "N8N_AUDIT_TABLE_ID"],
+      },
       webhookReady: true,
       n8n: {
         envVars: ["N8N_WEBHOOK_URL", "N8N_API_KEY"],

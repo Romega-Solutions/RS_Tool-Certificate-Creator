@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateEmailQueueStatus } from "@/lib/db";
+import { appendCertificateCallbackAudit } from "@/lib/automation/audit-history";
 import { requireAutomationCallbackAuth } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,18 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  const receivedAt = new Date().toISOString();
+  const audit = await appendCertificateCallbackAudit({
+    event: body.event,
+    requestId: typeof body.requestId === "string" ? body.requestId : null,
+    status,
+    receivedAt,
+    emailQueueId: typeof emailQueueId === "number" ? emailQueueId : null,
+    providerMessageId: typeof body.data?.providerMessageId === "string" ? body.data.providerMessageId : null,
+    errorMessage: typeof body.data?.errorMessage === "string" ? body.data.errorMessage : null,
+    raw: body,
+  });
+
   return NextResponse.json(
     {
       ok: true,
@@ -73,6 +86,7 @@ export async function POST(request: NextRequest) {
       acceptedStatus: status,
       queueUpdated: Boolean(queueUpdate),
       queueUpdate,
+      audit,
     },
     {
       headers: {
