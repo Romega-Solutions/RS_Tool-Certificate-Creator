@@ -3,6 +3,38 @@ import { writeFile, readdir } from "fs/promises";
 import path from "path";
 import fs from "fs";
 import { requireApiSession } from "@/lib/server-auth";
+import {
+  isN8nCertificateTemplateStorageConfigured,
+  nextN8nTemplateFilename,
+  saveN8nCertificateTemplate,
+} from "@/lib/n8n-certificate-templates";
+
+async function localTemplateFilenames(certificatesDir: string) {
+  if (!fs.existsSync(certificatesDir)) return [];
+
+  const existingFiles = await readdir(certificatesDir);
+  return existingFiles.filter((file) => file.match(/^template\d+\.png$/));
+}
+
+function nextLocalTemplateFilename(existingFiles: string[]) {
+  const templateNumbers = existingFiles
+    .map((file) => {
+      const match = file.match(/^template(\d+)\.png$/);
+      return match ? parseInt(match[1]) : 0;
+    })
+    .sort((a, b) => a - b);
+
+  let nextNumber = 1;
+  for (const num of templateNumbers) {
+    if (num === nextNumber) {
+      nextNumber++;
+    } else {
+      break;
+    }
+  }
+
+  return nextNumber > 20 ? null : `template${nextNumber}.png`;
+}
 
 export async function POST(request: NextRequest) {
   const unauthorized = await requireApiSession();
@@ -24,59 +56,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the public/certificates directory
     const certificatesDir = path.join(process.cwd(), "public", "certificates");
+    const localFilenames = await localTemplateFilenames(certificatesDir);
 
-    // Ensure directory exists
-    if (!fs.existsSync(certificatesDir)) {
-      fs.mkdirSync(certificatesDir, { recursive: true });
-    }
+    const filename = isN8nCertificateTemplateStorageConfigured()
+      ? await nextN8nTemplateFilename(undefined, localFilenames)
+      : nextLocalTemplateFilename(localFilenames);
 
-    // Find the next available template number
-    const existingFiles = await readdir(certificatesDir);
-    const templateNumbers = existingFiles
-      .filter((file) => file.match(/^template\d+\.png$/))
-      .map((file) => {
-        const match = file.match(/^template(\d+)\.png$/);
-        return match ? parseInt(match[1]) : 0;
-      })
-      .sort((a, b) => a - b);
-
-    // Find next number
-    let nextNumber = 1;
-    for (const num of templateNumbers) {
-      if (num === nextNumber) {
-        nextNumber++;
-      } else {
-        break;
-      }
-    }
-
-    // Check if we've reached the limit
-    if (nextNumber > 20) {
+    if (!filename) {
       return NextResponse.json(
         { error: "Maximum number of templates (20) reached" },
         { status: 400 }
       );
     }
 
-    // Create filename
-    const filename = `template${nextNumber}.png`;
-    const filepath = path.join(certificatesDir, filename);
-
-    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Write file
-    await writeFile(filepath, buffer);
+    if (isN8nCertificateTemplateStorageConfigured()) {
+      await saveN8nCertificateTemplate({
+        filename,
+        contentType: file.type || "image/png",
+        bytes: buffer,
+      });
+    } else {
+      if (!fs.existsSync(certificatesDir)) {
+        fs.mkdirSync(certificatesDir, { recursive: true });
+      }
+      await writeFile(path.join(certificatesDir, filename), buffer);
+    }
+
+    const match = filename.match(/^template(\d+)\.png$/);
+    const templateNumber = match ? parseInt(match[1], 10) : null;
 
     return NextResponse.json(
       {
         success: true,
         message: "Template uploaded successfully",
         filename,
-        templateNumber: nextNumber,
+        templateNumber,
+        storage: isN8nCertificateTemplateStorageConfigured() ? "n8n_data_table" : "local_filesystem",
       },
       { status: 200 }
     );

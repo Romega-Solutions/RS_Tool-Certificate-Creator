@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { unlink } from "fs/promises";
 import path from "path";
 import fs from "fs";
+import { deleteN8nCertificateTemplate, isN8nCertificateTemplateStorageConfigured } from "@/lib/n8n-certificate-templates";
+import { requireApiSession } from "@/lib/server-auth";
 
 export async function DELETE(request: NextRequest) {
+  const unauthorized = await requireApiSession();
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get("filename");
@@ -23,29 +28,31 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Get the file path
-    const filepath = path.join(
-      process.cwd(),
-      "public",
-      "certificates",
-      filename
-    );
-
-    // Check if file exists
-    if (!fs.existsSync(filepath)) {
-      return NextResponse.json(
-        { error: "Template not found" },
-        { status: 404 }
+    if (isN8nCertificateTemplateStorageConfigured()) {
+      await deleteN8nCertificateTemplate(filename);
+    } else {
+      const filepath = path.join(
+        process.cwd(),
+        "public",
+        "certificates",
+        filename
       );
-    }
 
-    // Delete the file
-    await unlink(filepath);
+      if (!fs.existsSync(filepath)) {
+        return NextResponse.json(
+          { error: "Template not found" },
+          { status: 404 }
+        );
+      }
+
+      await unlink(filepath);
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: "Template deleted successfully",
+        storage: isN8nCertificateTemplateStorageConfigured() ? "n8n_data_table" : "local_filesystem",
       },
       { status: 200 }
     );
