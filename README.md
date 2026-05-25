@@ -9,7 +9,7 @@ A modern, responsive certificate generator built with Next.js 14 and Tailwind CS
 - **🔐 Secure Authentication**: Protected routes with session management for authorized team members
 - **🎨 Drag & Drop Editor**: Intuitive interface for positioning elements
 - **📝 Advanced Text Customization**: Font selection, colors, sizing, and positioning
-- **🖼️ Template Management**: Multiple pre-built templates with custom upload support
+- **🖼️ Template Management**: Multiple pre-built templates with custom upload support and n8n Data Table fallback storage
 - **💾 High-Quality Export**: Download certificates as PNG at 2x resolution
 - **🌗 Dark/Light Mode**: Seamless theme switching with custom Romega Solutions color system
 - **📱 Responsive Design**: Works flawlessly across all devices
@@ -37,6 +37,7 @@ A modern, responsive certificate generator built with Next.js 14 and Tailwind CS
 This system now includes a complete email queue with:
 
 - **Queue Storage**: PostgreSQL via `DATABASE_URL`, or n8n Data Table via `N8N_CERTIFICATE_QUEUE_TABLE_ID`
+- **Template Storage**: Local filesystem in development, or n8n Data Table via `N8N_CERTIFICATE_TEMPLATE_TABLE_ID` in production
 - **n8n Webhook**: Configured with `N8N_WEBHOOK_URL`
 - **4 Email Presets**: Professional templates for different use cases
 - **Batch Support**: Queue multiple certificates with personalized emails
@@ -71,6 +72,7 @@ N8N_WEBHOOK_URL=https://n8n.example.com/webhook/certificate-email-api
 N8N_URL=https://n8n.example.com
 N8N_API_KEY=your_n8n_api_key
 N8N_CERTIFICATE_QUEUE_TABLE_ID=nVHE9LCcyohrNEdO
+N8N_CERTIFICATE_TEMPLATE_TABLE_ID=9ELqiAraypvLj0VA
 ADMIN_USERNAME=your_username
 ADMIN_PASSWORD=your_strong_password
 ADMIN_NAME=Certificate Admin
