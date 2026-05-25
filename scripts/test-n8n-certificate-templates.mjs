@@ -108,3 +108,26 @@ test("n8n template store deletes by filename filter", async () => {
     });
   });
 });
+
+test("n8n template store error includes path and response body", async () => {
+  const { saveN8nCertificateTemplate } = await import(modulePath);
+
+  await withEnv(env, async () => {
+    await assert.rejects(
+      () =>
+        saveN8nCertificateTemplate(
+          {
+            filename: "template6.png",
+            contentType: "image/png",
+            bytes: Buffer.from("image-bytes"),
+          },
+          async () =>
+            new Response(JSON.stringify({ message: "bad payload" }), {
+              status: 400,
+              headers: { "content-type": "application/json" },
+            }),
+        ),
+      /n8n template request \/rows failed with HTTP 400: .*bad payload/,
+    );
+  });
+});

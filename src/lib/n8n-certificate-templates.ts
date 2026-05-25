@@ -102,7 +102,8 @@ async function n8nFetchJson(path: string, init: RequestInit = {}, fetchImpl: Fet
     });
 
     if (!response.ok) {
-      throw new Error(`n8n template request failed with HTTP ${response.status}`);
+      const body = await response.text().catch(() => "");
+      throw new Error(`n8n template request ${path} failed with HTTP ${response.status}: ${body.slice(0, 500)}`);
     }
 
     return response.json();
