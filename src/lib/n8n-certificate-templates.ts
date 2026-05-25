@@ -1,4 +1,5 @@
 const N8N_TIMEOUT_MS = 10_000;
+const N8N_ROW_LIMIT = 250;
 const TEMPLATE_LIMIT = 20;
 
 type FetchLike = typeof fetch;
@@ -113,7 +114,7 @@ async function n8nFetchJson(path: string, init: RequestInit = {}, fetchImpl: Fet
 }
 
 export async function listN8nCertificateTemplates(fetchImpl?: FetchLike) {
-  const payload = await n8nFetchJson("/rows?limit=1000", undefined, fetchImpl);
+  const payload = await n8nFetchJson(`/rows?limit=${N8N_ROW_LIMIT}`, undefined, fetchImpl);
   return parseRows(payload)
     .map(rowToAsset)
     .filter((asset): asset is CertificateTemplateAsset => Boolean(asset))
@@ -121,7 +122,11 @@ export async function listN8nCertificateTemplates(fetchImpl?: FetchLike) {
 }
 
 export async function getN8nCertificateTemplate(filename: string, fetchImpl?: FetchLike) {
-  const payload = await n8nFetchJson(`/rows?limit=1000&search=${encodeURIComponent(filename)}`, undefined, fetchImpl);
+  const payload = await n8nFetchJson(
+    `/rows?limit=${N8N_ROW_LIMIT}&search=${encodeURIComponent(filename)}`,
+    undefined,
+    fetchImpl,
+  );
   return (
     parseRows(payload)
       .map(rowToAsset)

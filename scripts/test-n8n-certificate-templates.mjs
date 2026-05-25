@@ -28,19 +28,61 @@ const env = {
 
 test("n8n template store creates next available template filename", async () => {
   const { nextN8nTemplateFilename } = await import(modulePath);
+  const calls = [];
 
   await withEnv(env, async () => {
     process.env.N8N_CERTIFICATE_TEMPLATE_TABLE_ID = `${process.env.N8N_CERTIFICATE_TEMPLATE_TABLE_ID}\\r\\n`;
     const filename = await nextN8nTemplateFilename(
-      async () =>
-        Response.json([
+      async (url) => {
+        calls.push(url);
+        return Response.json([
           { filename: "template1.png", contentType: "image/png", dataBase64: "aaa", size: "3" },
           { filename: "template3.png", contentType: "image/png", dataBase64: "ccc", size: "3" },
-        ]),
+        ]);
+      },
       ["template2.png"],
     );
 
     assert.equal(filename, "template4.png");
+    assert.equal(calls[0], "https://n8n.example/api/v1/data-tables/template-table/rows?limit=250");
+  });
+});
+
+test("n8n template store searches with n8n row limit", async () => {
+  const { getN8nCertificateTemplate } = await import(modulePath);
+  const calls = [];
+
+  await withEnv(env, async () => {
+    const read = await getN8nCertificateTemplate("template 6.png", async (url) => {
+      calls.push(url);
+      return Response.json([
+        {
+          id: 7,
+          filename: "template 6.png",
+          contentType: "image/png",
+          dataBase64: Buffer.from("image-bytes").toString("base64"),
+          size: "11",
+        },
+      ]);
+    });
+
+    assert.equal(read?.filename, "template 6.png");
+    assert.equal(calls[0], "https://n8n.example/api/v1/data-tables/template-table/rows?limit=250&search=template%206.png");
+  });
+});
+
+test("n8n template store creates next available template filename from data wrapper", async () => {
+  const { nextN8nTemplateFilename } = await import(modulePath);
+
+  await withEnv(env, async () => {
+    const filename = await nextN8nTemplateFilename(
+      async () =>
+        Response.json({
+          data: [{ filename: "template1.png", contentType: "image/png", dataBase64: "aaa", size: "3" }],
+        }),
+    );
+
+    assert.equal(filename, "template2.png");
   });
 });
 

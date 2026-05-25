@@ -106,7 +106,11 @@ test("n8n queue store filters rows and calculates stats", async () => {
       N8N_CERTIFICATE_QUEUE_TABLE_ID: "queue-table",
     },
     async () => {
-      const fetchRows = async () => Response.json(rows);
+      const calls = [];
+      const fetchRows = async (url) => {
+        calls.push(url);
+        return Response.json(rows);
+      };
       const pending = await getN8nEmailQueue({ status: "pending" }, fetchRows);
       const stats = await getN8nEmailQueueStats(fetchRows);
 
@@ -115,6 +119,7 @@ test("n8n queue store filters rows and calculates stats", async () => {
         [10],
       );
       assert.deepEqual(stats, { total: 2, pending: 1, sent: 1, failed: 0 });
+      assert.equal(calls[0], "https://n8n.example/api/v1/data-tables/queue-table/rows?limit=250");
     },
   );
 });

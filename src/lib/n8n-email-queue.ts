@@ -1,4 +1,5 @@
 const N8N_TIMEOUT_MS = 10_000;
+const N8N_ROW_LIMIT = 250;
 
 export type EmailStatus = "pending" | "sending" | "sent" | "failed";
 
@@ -191,7 +192,7 @@ export async function getN8nEmailQueue(
   filters?: { status?: string; search?: string; dateFrom?: string; dateTo?: string },
   fetchImpl?: FetchLike,
 ): Promise<EmailQueueItem[]> {
-  const payload = await n8nFetchJson("/rows?limit=1000", undefined, fetchImpl);
+  const payload = await n8nFetchJson(`/rows?limit=${N8N_ROW_LIMIT}`, undefined, fetchImpl);
   return sortAndFilterRows(parseRows(payload).map(toEmailQueueItem), filters);
 }
 
