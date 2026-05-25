@@ -139,15 +139,15 @@ test("n8n template store deletes by filename filter", async () => {
   await withEnv(env, async () => {
     await deleteN8nCertificateTemplate("template6.png", async (url, init) => {
       calls.push({ url, init });
-      return Response.json([]);
+      return Response.json(true);
     });
 
-    assert.equal(calls[0].url, "https://n8n.example/api/v1/data-tables/template-table/rows/delete");
+    assert.equal(
+      calls[0].url,
+      'https://n8n.example/api/v1/data-tables/template-table/rows/delete?filter=%7B%22type%22%3A%22and%22%2C%22filters%22%3A%5B%7B%22columnName%22%3A%22filename%22%2C%22condition%22%3A%22eq%22%2C%22value%22%3A%22template6.png%22%7D%5D%7D',
+    );
     assert.equal(calls[0].init.method, "DELETE");
-    assert.deepEqual(JSON.parse(calls[0].init.body).filter, {
-      type: "and",
-      filters: [{ columnName: "filename", condition: "eq", value: "template6.png" }],
-    });
+    assert.equal(calls[0].init.body, undefined);
   });
 });
 

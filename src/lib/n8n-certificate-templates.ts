@@ -175,14 +175,11 @@ export async function saveN8nCertificateTemplate(
 }
 
 export async function deleteN8nCertificateTemplate(filename: string, fetchImpl?: FetchLike) {
+  const filter = encodeURIComponent(JSON.stringify(filenameFilter(filename)));
   await n8nFetchJson(
-    "/rows/delete",
+    `/rows/delete?filter=${filter}`,
     {
       method: "DELETE",
-      body: JSON.stringify({
-        filter: filenameFilter(filename),
-        returnData: "true",
-      }),
     },
     fetchImpl,
   );

@@ -228,14 +228,11 @@ export async function updateN8nEmailQueueStatus(
 }
 
 export async function deleteN8nEmailQueue(id: number, fetchImpl?: FetchLike): Promise<void> {
+  const filter = encodeURIComponent(JSON.stringify(idFilter(id)));
   await n8nFetchJson(
-    "/rows/delete",
+    `/rows/delete?filter=${filter}`,
     {
       method: "DELETE",
-      body: JSON.stringify({
-        filter: idFilter(id),
-        returnData: "true",
-      }),
     },
     fetchImpl,
   );

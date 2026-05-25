@@ -158,11 +158,10 @@ test("n8n queue store updates and deletes rows by id filter", async () => {
 
       await deleteN8nEmailQueue(12, async (url, init) => {
         calls.push({ url, init });
-        return Response.json([]);
+        return Response.json(true);
       });
 
       const updateBody = JSON.parse(calls[0].init.body);
-      const deleteBody = JSON.parse(calls[1].init.body);
 
       assert.equal(calls[0].url, "https://n8n.example/api/v1/data-tables/queue-table/rows/update");
       assert.equal(calls[0].init.method, "PATCH");
@@ -170,9 +169,12 @@ test("n8n queue store updates and deletes rows by id filter", async () => {
         type: "and",
         filters: [{ columnName: "id", condition: "eq", value: 12 }],
       });
-      assert.equal(calls[1].url, "https://n8n.example/api/v1/data-tables/queue-table/rows/delete");
+      assert.equal(
+        calls[1].url,
+        'https://n8n.example/api/v1/data-tables/queue-table/rows/delete?filter=%7B%22type%22%3A%22and%22%2C%22filters%22%3A%5B%7B%22columnName%22%3A%22id%22%2C%22condition%22%3A%22eq%22%2C%22value%22%3A12%7D%5D%7D',
+      );
       assert.equal(calls[1].init.method, "DELETE");
-      assert.deepEqual(deleteBody.filter, updateBody.filter);
+      assert.equal(calls[1].init.body, undefined);
     },
   );
 });
