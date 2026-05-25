@@ -35,6 +35,10 @@ export async function GET() {
         storage: "n8n_data_table_when_configured",
         envVars: ["N8N_URL", "N8N_API_KEY", "N8N_AUDIT_TABLE_ID"],
       },
+      emailQueue: {
+        storage: "postgres_when_database_url_configured_else_n8n_data_table",
+        envVars: ["DATABASE_URL", "N8N_URL", "N8N_API_KEY", "N8N_CERTIFICATE_QUEUE_TABLE_ID"],
+      },
       webhookReady: true,
       n8n: {
         envVars: ["N8N_WEBHOOK_URL", "N8N_API_KEY"],

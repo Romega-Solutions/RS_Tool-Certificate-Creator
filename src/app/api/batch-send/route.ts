@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
+import { getEmailQueueByIds, updateEmailQueueStatus } from "@/lib/db";
 import { requireApiSession } from "@/lib/server-auth";
 
 type CertificateWebhookPayload = {
@@ -40,14 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch items to send from PostgreSQL
-    const placeholders = ids.map((_, i) => `$${i + 1}`).join(",");
-    const query = `
-      SELECT id, recipient_email, recipient_name, subject, message, certificate_image, status
-      FROM email_queue
-      WHERE id IN (${placeholders})
-    `;
-    const { rows: items } = await pool.query(query, ids);
+    const items = await getEmailQueueByIds(ids.map((id) => Number(id)));
 
     const results = {
       success: 0,
@@ -59,18 +52,15 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       try {
         // Update status to sending
-        await pool.query("UPDATE email_queue SET status = $1 WHERE id = $2", [
-          "sending",
-          item.id,
-        ]);
+        await updateEmailQueueStatus({ id: item.id, status: "sending" });
 
         // Send to n8n webhook with the database ID
         // Prepare payload matching n8n code format
         const payload: CertificateWebhookPayload = {
           id: item.id, // Include database ID for n8n to call back
-          recipient_email: item.recipient_email,
-          recipient_name: item.recipient_name,
-          certificate_image: item.certificate_image,
+          recipient_email: item.recipientEmail,
+          recipient_name: item.recipientName,
+          certificate_image: item.certificateImage,
           subject: item.subject,
           message: item.message,
           timestamp: new Date().toISOString(),
@@ -99,18 +89,12 @@ export async function POST(request: NextRequest) {
 
         if (response.ok) {
           // Webhook accepted - update to sent immediately
-          await pool.query(
-            "UPDATE email_queue SET status = $1, sent_at = $2 WHERE id = $3",
-            ["sent", new Date().toISOString(), item.id]
-          );
+          await updateEmailQueueStatus({ id: item.id, status: "sent", sentAt: new Date().toISOString() });
           results.success++;
         } else {
           const errorText = await response.text();
           // If webhook itself fails, mark as failed immediately
-          await pool.query(
-            "UPDATE email_queue SET status = $1, error_message = $2 WHERE id = $3",
-            ["failed", `Webhook error: ${errorText}`, item.id]
-          );
+          await updateEmailQueueStatus({ id: item.id, status: "failed", errorMessage: `Webhook error: ${errorText}` });
           results.failed++;
           results.errors.push({ id: item.id, error: errorText });
         }
@@ -118,10 +102,7 @@ export async function POST(request: NextRequest) {
         const errorMsg =
           error instanceof Error ? error.message : "Unknown error";
         // If network error, mark as failed immediately
-        await pool.query(
-          "UPDATE email_queue SET status = $1, error_message = $2 WHERE id = $3",
-          ["failed", `Network error: ${errorMsg}`, item.id]
-        );
+        await updateEmailQueueStatus({ id: item.id, status: "failed", errorMessage: `Network error: ${errorMsg}` });
         results.failed++;
         results.errors.push({ id: item.id, error: errorMsg });
       }
