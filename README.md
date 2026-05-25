@@ -16,7 +16,7 @@ A modern, responsive certificate generator built with Next.js 14 and Tailwind CS
 - **⚡ Real-Time Preview**: See changes instantly as you edit
 - **🎯 Precise Positioning**: Pixel-perfect element placement
 - **🔤 Local Font Support**: Merriweather font loaded locally to avoid CORS issues
-- **📧 Email Queue System**: PostgreSQL-backed email queueing with n8n integration
+- **📧 Email Queue System**: PostgreSQL-backed email queueing with n8n Data Table fallback
 - **🔄 Auto-Refresh Status**: Real-time email status monitoring (5-second intervals)
 - **📦 Batch Generation**: Generate and queue multiple certificates at once
 - **🎓 Professional Email Presets**: 4 ready-to-use templates (Event, KPI, Internship, UMak)
@@ -36,7 +36,7 @@ A modern, responsive certificate generator built with Next.js 14 and Tailwind CS
 
 This system now includes a complete email queue with:
 
-- **PostgreSQL Database**: Configured with `DATABASE_URL`
+- **Queue Storage**: PostgreSQL via `DATABASE_URL`, or n8n Data Table via `N8N_CERTIFICATE_QUEUE_TABLE_ID`
 - **n8n Webhook**: Configured with `N8N_WEBHOOK_URL`
 - **4 Email Presets**: Professional templates for different use cases
 - **Batch Support**: Queue multiple certificates with personalized emails
@@ -68,6 +68,9 @@ Create a `.env.local` file in the root directory:
 ```env
 DATABASE_URL=postgresql://cert_admin:replace-with-password@db.example.com:5432/certificate_queue
 N8N_WEBHOOK_URL=https://n8n.example.com/webhook/certificate-email-api
+N8N_URL=https://n8n.example.com
+N8N_API_KEY=your_n8n_api_key
+N8N_CERTIFICATE_QUEUE_TABLE_ID=nVHE9LCcyohrNEdO
 ADMIN_USERNAME=your_username
 ADMIN_PASSWORD=your_strong_password
 ADMIN_NAME=Certificate Admin
