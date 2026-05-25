@@ -31,6 +31,7 @@ test("n8n queue store inserts rows and maps returned row id", async () => {
       N8N_CERTIFICATE_QUEUE_TABLE_ID: "queue-table",
     },
     async () => {
+      process.env.N8N_CERTIFICATE_QUEUE_TABLE_ID = `${process.env.N8N_CERTIFICATE_QUEUE_TABLE_ID}\\r\\n`;
       const item = await insertN8nEmailQueue(
         {
           recipientEmail: "learner@example.com",

@@ -20,13 +20,17 @@ type TemplateRow = {
 };
 
 function n8nTemplateConfig() {
-  const url = process.env.N8N_URL?.trim().replace(/\/+$/, "");
-  const apiKey = process.env.N8N_API_KEY?.trim();
-  const tableId = process.env.N8N_CERTIFICATE_TEMPLATE_TABLE_ID?.trim();
+  const url = cleanEnvValue(process.env.N8N_URL).replace(/\/+$/, "");
+  const apiKey = cleanEnvValue(process.env.N8N_API_KEY);
+  const tableId = cleanEnvValue(process.env.N8N_CERTIFICATE_TEMPLATE_TABLE_ID);
 
   if (!url || !apiKey || !tableId) return null;
 
   return { url, apiKey, tableId };
+}
+
+function cleanEnvValue(value?: string) {
+  return (value ?? "").replace(/\\r|\\n/g, "").trim();
 }
 
 export function isN8nCertificateTemplateStorageConfigured() {

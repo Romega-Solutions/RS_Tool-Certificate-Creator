@@ -30,6 +30,7 @@ test("n8n template store creates next available template filename", async () => 
   const { nextN8nTemplateFilename } = await import(modulePath);
 
   await withEnv(env, async () => {
+    process.env.N8N_CERTIFICATE_TEMPLATE_TABLE_ID = `${process.env.N8N_CERTIFICATE_TEMPLATE_TABLE_ID}\\r\\n`;
     const filename = await nextN8nTemplateFilename(
       async () =>
         Response.json([
